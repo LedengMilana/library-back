@@ -33,7 +33,26 @@ class ReturnController {
                     if (err2) {
                         return res.status(400).json({ message: "Ошибка при подтверждении возврата" });
                     }
-                    return res.json({ message: "Возврат успешно зарегистрирован", status_id });
+                    db.get(`SELECT book_id FROM borrowing WHERE borrowing_id = ?`, [borrowing_id], (err3, borrowingData) => {
+											if (err3) {
+													return res.status(400).json({ message: "Ошибка при получении book_id для обновления статуса книги" });
+											}
+	
+											if (!borrowingData) {
+													return res.status(404).json({ message: "Данные о выдаче для обновления статуса книги не найдены" });
+											}
+	
+											db.run(`
+													UPDATE book
+													SET status_id = 1
+													WHERE book_id = ?
+											`, [borrowingData.book_id], function(err4) {
+													if (err4) {
+															return res.status(400).json({ message: "Ошибка при обновлении статуса книги" });
+													}
+													return res.json({ message: "Возврат успешно зарегистрирован" });
+											});
+									});
                 });
             });
         } catch (e) {

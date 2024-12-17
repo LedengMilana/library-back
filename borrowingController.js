@@ -42,7 +42,16 @@ class BorrowingController {
                 if (err) {
                     return res.status(400).json({ message: "Ошибка при регистрации выдачи книги" });
                 }
-                return res.json({ message: "Выдача успешно зарегистрирована" });
+                db.run(`
+									UPDATE book
+									SET status_id = 2
+									WHERE book_id = ?
+							`, [book_id], function(updateErr) {
+									if (updateErr) {
+											return res.status(400).json({ message: "Ошибка при обновлении статуса книги" });
+									}
+									return res.json({ message: "Выдача успешно зарегистрирована" });
+							});
             });
         } catch (e) {
             console.log(e);
